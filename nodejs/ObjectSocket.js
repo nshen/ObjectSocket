@@ -13,7 +13,7 @@ var ObjectSocket = (function (_super) {
         this._bufferOffset = 0;
         this._lastLen = 0;
         this._buffer = new Buffer(1024);
-        this._open = false;
+        this._open = true;
         this._socket = socket;
         var This = this;
         this._socket.on("connect", function () {
