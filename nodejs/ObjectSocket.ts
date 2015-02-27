@@ -10,7 +10,7 @@ export class ObjectSocket extends event.EventEmitter{
     private _lastLen: number = 0;
     private _buffer: NodeBuffer = new Buffer(1024);//1k; 
 
-    private _open: bool = false;
+    private _open: bool = true;
 
     constructor(socket: net.NodeSocket)
     {
@@ -35,7 +35,7 @@ export class ObjectSocket extends event.EventEmitter{
     }
 
     /**
-    * ·¢ËÍObject
+    * å‘é€Object
     */
     public sendObject(obj: Object): void
     {
@@ -50,16 +50,16 @@ export class ObjectSocket extends event.EventEmitter{
     }
 
     /**
-    *  ½«Ã¿´Îsocket´«À´µÄÊı¾İ¶¼Ìíµ½_bufferÎ²²¿µÈ´ı´¦Àí
+    *  å°†æ¯æ¬¡socketä¼ æ¥çš„æ•°æ®éƒ½æ·»åˆ°_bufferå°¾éƒ¨ç­‰å¾…å¤„ç†
     */
     private readBuffer(data: NodeBuffer): void
     {
         //-------------------------------------------------------------
-        // ²»Í¬ÓÚflash¶Ë£¬ÓÉÓÚ_bufferÊÇ¹Ì³¤µÄ£¬ÕâÀïÒª×ÔĞĞËõ·Å
+        // ä¸åŒäºflashç«¯ï¼Œç”±äº_bufferæ˜¯å›ºé•¿çš„ï¼Œè¿™é‡Œè¦è‡ªè¡Œç¼©æ”¾
 
         var needLength: number = data.length + this._bufferEnd;
         if (needLength > this._buffer.length) {
-            //buffer×°²»ÏÂĞÂÀ´µÄÊı¾İÁË£¬´´½¨¸öĞÂµÄÊÇÔ­À´µÄ2±¶³¤
+            //bufferè£…ä¸ä¸‹æ–°æ¥çš„æ•°æ®äº†ï¼Œåˆ›å»ºä¸ªæ–°çš„æ˜¯åŸæ¥çš„2å€é•¿
             var newLength: number = this._buffer.length;
             while (needLength > newLength) {
                 newLength *= 2;
@@ -82,30 +82,30 @@ export class ObjectSocket extends event.EventEmitter{
 
    
     /**
-    * ½âÎö_buffer
+    * è§£æ_buffer
     */
     private decodeBuffer(): void
     {
         // decode buffer
         var tryAgain: bool = false;
         do {
-            if (this._lastLen == 0) //Ã»¶ÁÈ¡°ü³¤¶È
+            if (this._lastLen == 0) //æ²¡è¯»å–åŒ…é•¿åº¦
             {
-                if ((this._bufferEnd - this._bufferOffset) >= 4) // ÓĞ°üÍ·
+                if ((this._bufferEnd - this._bufferOffset) >= 4) // æœ‰åŒ…å¤´
                 {
                     var len: number = this._buffer.readUInt32BE(this._bufferOffset);
                     if (len <= 0)
                         throw new Error("package length error");
                     this._bufferOffset += 4;
-                    if ((this._bufferEnd - this._bufferOffset) >= len)//ÓĞÕû¸ö°ü
+                    if ((this._bufferEnd - this._bufferOffset) >= len)//æœ‰æ•´ä¸ªåŒ…
                     {
-                        var packageData: NodeBuffer = new Buffer(len);//¶Á³öÕû¸ö°ü
+                        var packageData: NodeBuffer = new Buffer(len);//è¯»å‡ºæ•´ä¸ªåŒ…
                         this._buffer.copy(packageData, 0, this._bufferOffset, this._bufferEnd);                  
                         this.getPackage(packageData);
                         this._lastLen = 0;
                         this._bufferOffset += len;
-                        tryAgain = true; //¿ÉÄÜ»¹ÓĞ°ü
-                    } else { //Ö»ÓĞ³¤¶È£¬°ü²»È«£¬µÈÏÂ´Î
+                        tryAgain = true; //å¯èƒ½è¿˜æœ‰åŒ…
+                    } else { //åªæœ‰é•¿åº¦ï¼ŒåŒ…ä¸å…¨ï¼Œç­‰ä¸‹æ¬¡
                         this._lastLen = len;
                         tryAgain = false;
                     }
@@ -124,12 +124,12 @@ export class ObjectSocket extends event.EventEmitter{
 
             } else {
                 if (this._bufferEnd - this._bufferOffset >= this._lastLen) {
-                    //ÓĞÕû¸ö°üÁË
-                    var packageData: NodeBuffer = new Buffer(this._lastLen);//¶Á³öÕû¸ö°ü
+                    //æœ‰æ•´ä¸ªåŒ…äº†
+                    var packageData: NodeBuffer = new Buffer(this._lastLen);//è¯»å‡ºæ•´ä¸ªåŒ…
                     this._buffer.copy(packageData, 0, this._bufferOffset, this._bufferEnd);
                     this.getPackage(packageData);
                     this._bufferOffset += this._lastLen;
-                    tryAgain = true;//ÓĞ¿ÉÄÜ»¹ÓĞ°ü
+                    tryAgain = true;//æœ‰å¯èƒ½è¿˜æœ‰åŒ…
                 } else {
                     tryAgain = false;
                 }
